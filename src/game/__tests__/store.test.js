@@ -9,16 +9,6 @@ import {
   cancelPendingSave,
 } from '../utils';
 
-const mockStorage = {};
-if (typeof globalThis.localStorage === 'undefined') {
-  globalThis.localStorage = {
-    getItem: (key) => mockStorage[key] ?? null,
-    setItem: (key, val) => { mockStorage[key] = String(val); },
-    removeItem: (key) => { delete mockStorage[key]; },
-    clear: () => { Object.keys(mockStorage).forEach(k => delete mockStorage[k]); },
-  };
-}
-
 describe('Zustand Tetris Store & State Transitions', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -146,17 +136,16 @@ describe('Zustand Tetris Store & State Transitions', () => {
     });
 
     it('should reject finishClearLines callback if roundId is stale', () => {
-      const initialRound = useTetrisStore.getState().roundId;
-      const initialMatrix = useTetrisStore.getState().matrix;
-
-      // Start new round, incrementing roundId
+      const oldRoundId = useTetrisStore.getState().roundId;
       useTetrisStore.getState().startGame();
 
-      // Attempt to invoke callback with old roundId
-      useTetrisStore.getState().finishClearLines([19], initialRound);
+      const before = useTetrisStore.getState();
+      useTetrisStore.getState().finishClearLines([19], oldRoundId);
+      const after = useTetrisStore.getState();
 
-      // Matrix should remain unchanged
-      expect(useTetrisStore.getState().matrix).toEqual(useTetrisStore.getState().matrix);
+      expect(after.matrix).toBe(before.matrix);
+      expect(after.points).toBe(before.points);
+      expect(after.clearLines).toBe(before.clearLines);
     });
 
     it('should reject finishClearLines callback if game is in reset state', () => {
