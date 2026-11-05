@@ -186,15 +186,25 @@ const keyMap = {
 };
 
 export function setupKeyboardListeners() {
-  const pressedKeys = new Set();
+  const activePhysicalKeys = new Set();
 
   const onKeyDown = (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey || !(e.key in keyMap)) return;
     e.preventDefault();
+    if (activePhysicalKeys.has(e.key)) return;
+
     const actionKey = keyMap[e.key];
-    if (pressedKeys.has(actionKey)) return;
-    pressedKeys.add(actionKey);
-    if (actions[actionKey]) {
+    let actionAlreadyActive = false;
+    for (const key of activePhysicalKeys) {
+      if (keyMap[key] === actionKey) {
+        actionAlreadyActive = true;
+        break;
+      }
+    }
+
+    activePhysicalKeys.add(e.key);
+
+    if (!actionAlreadyActive && actions[actionKey]) {
       actions[actionKey].down();
     }
   };
@@ -202,20 +212,36 @@ export function setupKeyboardListeners() {
   const onKeyUp = (e) => {
     if (e.metaKey || !(e.key in keyMap)) return;
     e.preventDefault();
+    if (!activePhysicalKeys.has(e.key)) return;
+
+    activePhysicalKeys.delete(e.key);
     const actionKey = keyMap[e.key];
-    pressedKeys.delete(actionKey);
-    if (actions[actionKey]) {
+
+    let actionStillActive = false;
+    for (const key of activePhysicalKeys) {
+      if (keyMap[key] === actionKey) {
+        actionStillActive = true;
+        break;
+      }
+    }
+
+    if (!actionStillActive && actions[actionKey]) {
       actions[actionKey].up();
     }
   };
 
   const onBlur = () => {
-    pressedKeys.forEach(actionKey => {
-      if (actions[actionKey]) {
-        actions[actionKey].up();
+    const releasedActions = new Set();
+    for (const key of activePhysicalKeys) {
+      const actionKey = keyMap[key];
+      if (actionKey && !releasedActions.has(actionKey)) {
+        releasedActions.add(actionKey);
+        if (actions[actionKey]) {
+          actions[actionKey].up();
+        }
       }
-    });
-    pressedKeys.clear();
+    }
+    activePhysicalKeys.clear();
     keyManager.clearAll();
   };
 
