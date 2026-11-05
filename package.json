@@ -1,0 +1,35 @@
+{
+  "name": "react-tetris",
+  "version": "2.0.0",
+  "description": "基于现代 Vite + Preact + Hooks 重构的高性能复古掌机俄罗斯方块",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node postbuild.cjs",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "tetris",
+    "preact",
+    "vite",
+    "game",
+    "retro",
+    "gameboy"
+  ],
+  "author": "huy8000",
+  "license": "Apache-2.0",
+  "homepage": "https://heyhuyu.com/tetris/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huy8000/react-tetris.git"
+  },
+  "dependencies": {
+    "preact": "^10.29.0",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.4",
+    "less": "^4.6.4",
+    "vite": "^8.3.5"
+  }
+}
