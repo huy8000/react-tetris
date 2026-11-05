@@ -1,7 +1,8 @@
+import { memo } from 'preact/compat';
 import style from './button.module.less';
 import { cn } from '../../utils/cn';
 
-export function Button({
+export const Button = memo(function Button({
   color,
   size,
   top,
@@ -33,4 +34,4 @@ export function Button({
       <span className={cn({ [style.position]: position })}>{label}</span>
     </div>
   );
-}
+});

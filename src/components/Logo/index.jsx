@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import style from './index.module.less';
 import { cn } from '../../utils/cn';
 import { i18n } from '../../game/consts';
 
-export function LogoDisplay({ cur = false, reset = false }) {
+export const LogoDisplay = memo(function LogoDisplay({ cur = false, reset = false }) {
   const [dragonStyle, setDragonStyle] = useState(style.r1);
   const [display, setDisplay] = useState('none');
+  const timers = useRef([]);
 
   useEffect(() => {
     if (cur || reset) {
@@ -13,12 +15,15 @@ export function LogoDisplay({ cur = false, reset = false }) {
       return;
     }
 
-    let timeoutId = null;
+    let cancelled = false;
     let m = 'r';
     let count = 0;
 
     const set = (fn, delay) => {
-      timeoutId = setTimeout(fn, delay);
+      const id = setTimeout(() => {
+        if (!cancelled) fn();
+      }, delay);
+      timers.current.push(id);
     };
 
     const show = (fn) => {
@@ -89,7 +94,9 @@ export function LogoDisplay({ cur = false, reset = false }) {
     });
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      cancelled = true;
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
     };
   }, [cur, reset]);
 
@@ -98,7 +105,7 @@ export function LogoDisplay({ cur = false, reset = false }) {
   return (
     <div className={style.logo} style={{ display }}>
       <div className={cn('bg', style.dragon, dragonStyle)} />
-      <p dangerouslySetInnerHTML={{ __html: i18n.titleCenter }} />
+      <p>{i18n.title}<br />TETRIS</p>
     </div>
   );
-}
+});

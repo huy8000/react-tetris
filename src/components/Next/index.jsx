@@ -1,3 +1,4 @@
+import { memo } from 'preact/compat';
 import style from './index.module.less';
 import { blockShape } from '../../game/consts';
 
@@ -16,7 +17,7 @@ const empty = [
   [0, 0, 0, 0],
 ];
 
-export function NextPreview({ data = 'T' }) {
+export const NextPreview = memo(function NextPreview({ data = 'T' }) {
   const shape = blockShape[data] || blockShape.T;
   const block = empty.map(row => [...row]);
   const offset = xy[data] || [0, 0];
@@ -40,4 +41,4 @@ export function NextPreview({ data = 'T' }) {
       ))}
     </div>
   );
-}
+});

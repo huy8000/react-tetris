@@ -38,7 +38,9 @@ class SoundPlayer {
         src.buffer = buf;
         src.connect(this.context.destination);
         src.start(0);
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Audio unlock error:', e);
+      }
       ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
         document.removeEventListener(evt, unlock, true);
       });

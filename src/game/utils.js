@@ -41,13 +41,13 @@ export function isOver(matrix) {
 
 export function getStartMatrix(startLines) {
   const getLine = (min, max) => {
-    const count = parseInt(((max - min + 1) * Math.random()) + min, 10);
+    const count = Math.floor(((max - min + 1) * Math.random()) + min);
     const line = [];
     for (let i = 0; i < count; i++) {
       line.push(1);
     }
     for (let i = 0, len = 10 - count; i < len; i++) {
-      const index = parseInt((line.length + 1) * Math.random(), 10);
+      const index = Math.floor((line.length + 1) * Math.random());
       line.splice(index, 0, 0);
     }
     return line;
@@ -72,9 +72,7 @@ export function loadLastRecord() {
   try {
     let data = localStorage.getItem(StorageKey);
     if (!data) return null;
-    if (window.btoa) {
-      data = atob(data);
-    }
+    data = atob(data);
     data = decodeURIComponent(data);
     return JSON.parse(data);
   } catch (e) {
@@ -82,8 +80,8 @@ export function loadLastRecord() {
   }
 }
 
-export function saveRecord(state) {
-  if (state.lock) return;
+let saveTimer = null;
+function doSave(state) {
   try {
     const dataToSave = {
       matrix: state.matrix,
@@ -106,9 +104,32 @@ export function saveRecord(state) {
     };
     let data = JSON.stringify(dataToSave);
     data = encodeURIComponent(data);
-    if (window.btoa) {
-      data = btoa(data);
-    }
+    data = btoa(data);
     localStorage.setItem(StorageKey, data);
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Save record error:', e);
+  }
+}
+
+export function saveRecord(state) {
+  if (state.lock) return;
+  doSave(state);
+}
+
+export function saveRecordDebounced(state) {
+  if (state.lock) return;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    doSave(state);
+    saveTimer = null;
+  }, 1000);
+}
+
+export function saveRecordImmediate(state) {
+  if (state.lock) return;
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+  }
+  doSave(state);
 }

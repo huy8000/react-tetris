@@ -15,6 +15,8 @@ import {
   getStartMatrix,
   loadLastRecord,
   saveRecord,
+  saveRecordDebounced,
+  saveRecordImmediate,
 } from './utils';
 import { sound } from './audio';
 
@@ -35,6 +37,8 @@ export const useTetrisStore = create((set, get) => ({
   pause: false,
   music: record ? record.music !== false : true,
   lock: false,
+  _dropTimer: null,
+  _lockTimer: null,
   keyboard: {
     drop: false,
     down: false,
@@ -56,7 +60,7 @@ export const useTetrisStore = create((set, get) => ({
     const nextState = !get().music;
     sound.enabled = nextState;
     set({ music: nextState });
-    saveRecord(get());
+    saveRecordImmediate(get());
   },
 
   pauseGame: () => {
@@ -66,7 +70,7 @@ export const useTetrisStore = create((set, get) => ({
       return;
     }
     set({ pause: !pause });
-    saveRecord(get());
+    saveRecordImmediate(get());
   },
 
   startGame: () => {
@@ -88,7 +92,7 @@ export const useTetrisStore = create((set, get) => ({
       lock: false,
       clearLines: 0,
     });
-    saveRecord(get());
+    saveRecordImmediate(get());
   },
 
   resetGame: () => {
@@ -112,13 +116,13 @@ export const useTetrisStore = create((set, get) => ({
     const next = cur.left();
     const delay = delays[speedRun - 1];
     if (want(next, matrix)) {
-      next.timeStamp += parseInt(delay, 10);
+      next.timeStamp += Math.floor(delay);
       set({ cur: next });
     } else {
-      cur.timeStamp += parseInt(delay / 1.5, 10);
+      cur.timeStamp += Math.floor(delay / 1.5);
       set({ cur });
     }
-    saveRecord(get());
+    saveRecordDebounced(get());
   },
 
   moveRight: () => {
@@ -138,13 +142,13 @@ export const useTetrisStore = create((set, get) => ({
     const next = cur.right();
     const delay = delays[speedRun - 1];
     if (want(next, matrix)) {
-      next.timeStamp += parseInt(delay, 10);
+      next.timeStamp += Math.floor(delay);
       set({ cur: next });
     } else {
-      cur.timeStamp += parseInt(delay / 1.5, 10);
+      cur.timeStamp += Math.floor(delay / 1.5);
       set({ cur });
     }
-    saveRecord(get());
+    saveRecordDebounced(get());
   },
 
   rotate: () => {
@@ -164,7 +168,7 @@ export const useTetrisStore = create((set, get) => ({
     const next = cur.rotate();
     if (want(next, matrix)) {
       set({ cur: next });
-      saveRecord(get());
+      saveRecordDebounced(get());
     }
   },
 
@@ -189,11 +193,11 @@ export const useTetrisStore = create((set, get) => ({
     } else {
       get().lockPiece(cur, matrix);
     }
-    saveRecord(get());
+    saveRecordDebounced(get());
   },
 
   hardDrop: () => {
-    const { cur, matrix, pause, lock } = get();
+    const { cur, matrix, pause, lock, _dropTimer } = get();
     if (lock) return;
     if (!cur) {
       get().startGame();
@@ -211,14 +215,18 @@ export const useTetrisStore = create((set, get) => ({
       bottom = cur.fall(index);
     }
     bottom = cur.fall(index - 1);
-    set({ drop: true, cur: bottom });
-    setTimeout(() => {
-      set({ drop: false });
+    if (_dropTimer) clearTimeout(_dropTimer);
+    const timerId = setTimeout(() => {
+      set({ drop: false, _dropTimer: null });
     }, 100);
+    set({ drop: true, cur: bottom, _dropTimer: timerId });
     get().lockPiece(bottom, matrix);
   },
 
   lockPiece: (curPiece, currentMatrix) => {
+    const { _lockTimer } = get();
+    if (_lockTimer) clearTimeout(_lockTimer);
+
     let newMatrix = currentMatrix.map(row => [...row]);
     const shape = curPiece.shape;
     const xy = curPiece.xy;
@@ -230,7 +238,8 @@ export const useTetrisStore = create((set, get) => ({
       });
     });
 
-    const addPoints = get().points + 10 + (get().speedRun - 1) * 2;
+    const currentPoints = get().points;
+    const addPoints = currentPoints + 10 + (get().speedRun - 1) * 2;
     const newMax = Math.max(get().max, addPoints);
 
     set({
@@ -256,16 +265,18 @@ export const useTetrisStore = create((set, get) => ({
     }
 
     // Proceed to next piece
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       const nextType = get().next;
       const futureNext = getNextType();
       set({
         lock: false,
         cur: new Block({ type: nextType }),
         next: futureNext,
+        _lockTimer: null,
       });
       saveRecord(get());
     }, 100);
+    set({ _lockTimer: timerId });
   },
 
   finishClearLines: (clearedRows) => {
@@ -290,14 +301,19 @@ export const useTetrisStore = create((set, get) => ({
       cur: new Block({ type: get().next }),
       next: getNextType(),
     });
-    saveRecord(get());
+    saveRecordImmediate(get());
   },
 
   overStart: () => {
+    const { _dropTimer, _lockTimer } = get();
+    if (_dropTimer) clearTimeout(_dropTimer);
+    if (_lockTimer) clearTimeout(_lockTimer);
     set({
       lock: true,
       reset: true,
       pause: false,
+      _dropTimer: null,
+      _lockTimer: null,
     });
   },
 
@@ -309,6 +325,6 @@ export const useTetrisStore = create((set, get) => ({
       lock: false,
       clearLines: 0,
     });
-    saveRecord(get());
+    saveRecordImmediate(get());
   },
 }));

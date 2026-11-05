@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import { NumberDisplay } from '../Number';
 import { i18n } from '../../game/consts';
 
-export function PointDisplay({ cur = false, point = 0, max = 0 }) {
+export const PointDisplay = memo(function PointDisplay({ cur = false, point = 0, max = 0 }) {
   const [label, setLabel] = useState('');
   const [number, setNumber] = useState(0);
 
@@ -42,4 +43,4 @@ export function PointDisplay({ cur = false, point = 0, max = 0 }) {
       <NumberDisplay number={number} />
     </div>
   );
-}
+});

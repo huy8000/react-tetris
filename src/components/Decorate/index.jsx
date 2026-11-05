@@ -1,8 +1,9 @@
+import { memo } from 'preact/compat';
 import style from './index.module.less';
 import { cn } from '../../utils/cn';
 import { i18n } from '../../game/consts';
 
-export function Decorate() {
+export const Decorate = memo(function Decorate() {
   return (
     <div className={style.decorate}>
       <div className={style.topBorder}>
@@ -116,4 +117,4 @@ export function Decorate() {
       </div>
     </div>
   );
-}
+});

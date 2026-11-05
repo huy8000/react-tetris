@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import style from './index.module.less';
 import { isClear } from '../../game/utils';
 import { useTetrisStore } from '../../game/store';
@@ -6,10 +7,25 @@ import { useTetrisStore } from '../../game/store';
 const fillLine = Array(10).fill(1);
 const blankLine = Array(10).fill(0);
 
-export function MatrixDisplay({ matrix, cur, reset }) {
+const Cell = memo(function Cell({ value }) {
+  return <b className={value === 1 ? 'c' : value === 2 ? 'd' : ''} />;
+});
+
+const Row = memo(function Row({ row }) {
+  return (
+    <p>
+      {row.map((cell, cIdx) => (
+        <Cell key={cIdx} value={cell} />
+      ))}
+    </p>
+  );
+});
+
+export const MatrixDisplay = memo(function MatrixDisplay({ matrix, cur, reset }) {
   const [clearState, setClearState] = useState(null);
   const [animateColor, setAnimateColor] = useState(2);
   const [overState, setOverState] = useState(null);
+  const clearTimers = useRef([]);
 
   const finishClearLines = useTetrisStore(s => s.finishClearLines);
   const overEnd = useTetrisStore(s => s.overEnd);
@@ -20,10 +36,16 @@ export function MatrixDisplay({ matrix, cur, reset }) {
     if (clears && !clearState) {
       setClearState(clears);
 
+      const addTimer = (fn, delay) => {
+        const id = setTimeout(fn, delay);
+        clearTimers.current.push(id);
+        return id;
+      };
+
       const anim = (cb) => {
-        setTimeout(() => {
+        addTimer(() => {
           setAnimateColor(0);
-          setTimeout(() => {
+          addTimer(() => {
             setAnimateColor(2);
             if (cb) cb();
           }, 100);
@@ -33,7 +55,7 @@ export function MatrixDisplay({ matrix, cur, reset }) {
       anim(() => {
         anim(() => {
           anim(() => {
-            setTimeout(() => {
+            addTimer(() => {
               setClearState(null);
               finishClearLines(clears);
             }, 100);
@@ -41,6 +63,11 @@ export function MatrixDisplay({ matrix, cur, reset }) {
         });
       });
     }
+
+    return () => {
+      clearTimers.current.forEach(clearTimeout);
+      clearTimers.current = [];
+    };
   }, [matrix]);
 
   // Game over animation
@@ -104,15 +131,8 @@ export function MatrixDisplay({ matrix, cur, reset }) {
   return (
     <div className={style.matrix}>
       {displayMatrix.map((row, rIdx) => (
-        <p key={rIdx}>
-          {row.map((cell, cIdx) => (
-            <b
-              key={cIdx}
-              className={cell === 1 ? 'c' : cell === 2 ? 'd' : ''}
-            />
-          ))}
-        </p>
+        <Row key={rIdx} row={row} />
       ))}
     </div>
   );
-}
+});

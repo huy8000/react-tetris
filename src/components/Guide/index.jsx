@@ -1,7 +1,8 @@
+import { memo } from 'preact/compat';
 import style from './index.module.less';
 import { cn } from '../../utils/cn';
 
-export function Guide() {
+export const Guide = memo(function Guide() {
   return (
     <div>
       <div className={cn(style.guide, style.right)}>
@@ -23,4 +24,4 @@ export function Guide() {
       </div>
     </div>
   );
-}
+});

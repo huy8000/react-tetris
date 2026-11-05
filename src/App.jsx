@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useMemo } from 'preact/hooks';
+import { memo } from 'preact/compat';
+import { useShallow } from 'zustand/shallow';
 import style from './App.module.less';
 import { cn } from './utils/cn';
 import { useTetrisStore } from './game/store';
@@ -23,19 +25,26 @@ export function App() {
     h: document.documentElement.clientHeight,
   });
 
-  const matrix = useTetrisStore(s => s.matrix);
-  const cur = useTetrisStore(s => s.cur);
-  const reset = useTetrisStore(s => s.reset);
-  const points = useTetrisStore(s => s.points);
-  const max = useTetrisStore(s => s.max);
-  const clearLines = useTetrisStore(s => s.clearLines);
-  const startLines = useTetrisStore(s => s.startLines);
-  const speedRun = useTetrisStore(s => s.speedRun);
-  const speedStart = useTetrisStore(s => s.speedStart);
-  const next = useTetrisStore(s => s.next);
-  const music = useTetrisStore(s => s.music);
-  const pause = useTetrisStore(s => s.pause);
-  const drop = useTetrisStore(s => s.drop);
+  const {
+    matrix, cur, reset, points, max, clearLines,
+    startLines, speedRun, speedStart, next, music, pause, drop,
+  } = useTetrisStore(
+    useShallow(s => ({
+      matrix: s.matrix,
+      cur: s.cur,
+      reset: s.reset,
+      points: s.points,
+      max: s.max,
+      clearLines: s.clearLines,
+      startLines: s.startLines,
+      speedRun: s.speedRun,
+      speedStart: s.speedStart,
+      next: s.next,
+      music: s.music,
+      pause: s.pause,
+      drop: s.drop,
+    }))
+  );
 
   // Sound initialization & controls
   useEffect(() => {
@@ -60,26 +69,28 @@ export function App() {
   }, []);
 
   // Compute responsive layout
-  let filling = 0;
-  const ratio = dimensions.h / dimensions.w;
-  let scale = 1;
-  let appStyle = {};
+  const { filling, appStyle } = useMemo(() => {
+    const ratio = dimensions.h / dimensions.w;
+    let fill = 0;
+    let computedStyle = {};
 
-  if (ratio < 1.5) {
-    scale = dimensions.h / 960;
-    appStyle = {
-      transform: `scale(${scale})`,
-    };
-  } else {
-    scale = dimensions.w / 640;
-    filling = (dimensions.h - (960 * scale)) / scale / 3;
-    appStyle = {
-      transform: `scale(${scale})`,
-      paddingTop: Math.floor(filling) + 42,
-      paddingBottom: Math.floor(filling),
-      marginTop: Math.floor(-480 - (filling * 1.5)),
-    };
-  }
+    if (ratio < 1.5) {
+      const scale = dimensions.h / 960;
+      computedStyle = {
+        transform: `scale(${scale})`,
+      };
+    } else {
+      const scale = dimensions.w / 640;
+      fill = (dimensions.h - (960 * scale)) / scale / 3;
+      computedStyle = {
+        transform: `scale(${scale})`,
+        paddingTop: Math.floor(fill) + 42,
+        paddingBottom: Math.floor(fill),
+        marginTop: Math.floor(-480 - (fill * 1.5)),
+      };
+    }
+    return { filling: fill, appStyle: computedStyle };
+  }, [dimensions.w, dimensions.h]);
 
   return (
     <div className={style.app} style={appStyle}>

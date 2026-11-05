@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import style from './index.module.less';
 import { cn } from '../../utils/cn';
 
@@ -6,7 +7,7 @@ function formatTwoDigits(num) {
   return num < 10 ? ['0', `${num}`] : `${num}`.split('');
 }
 
-export function NumberDisplay({ number = 0, length = 6, time = false }) {
+export const NumberDisplay = memo(function NumberDisplay({ number = 0, length = 6, time = false }) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -37,4 +38,4 @@ export function NumberDisplay({ number = 0, length = 6, time = false }) {
       ))}
     </div>
   );
-}
+});

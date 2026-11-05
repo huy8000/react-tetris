@@ -164,23 +164,26 @@ export const actions = {
 };
 
 const keyMap = {
-  37: 'left',
-  38: 'rotate',
-  39: 'right',
-  40: 'down',
-  32: 'space',
-  83: 's',
-  82: 'r',
-  80: 'p',
+  ArrowLeft: 'left',
+  ArrowUp: 'rotate',
+  ArrowRight: 'right',
+  ArrowDown: 'down',
+  ' ': 'space',
+  s: 's',
+  S: 's',
+  r: 'r',
+  R: 'r',
+  p: 'p',
+  P: 'p',
 };
 
 export function setupKeyboardListeners() {
   let activeKey = null;
 
   const onKeyDown = (e) => {
-    if (e.metaKey || !(e.keyCode in keyMap)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || !(e.key in keyMap)) return;
     e.preventDefault();
-    const actionKey = keyMap[e.keyCode];
+    const actionKey = keyMap[e.key];
     if (activeKey === actionKey) return;
     activeKey = actionKey;
     if (actions[actionKey]) {
@@ -189,9 +192,9 @@ export function setupKeyboardListeners() {
   };
 
   const onKeyUp = (e) => {
-    if (e.metaKey || !(e.keyCode in keyMap)) return;
+    if (e.metaKey || !(e.key in keyMap)) return;
     e.preventDefault();
-    const actionKey = keyMap[e.keyCode];
+    const actionKey = keyMap[e.key];
     if (activeKey === actionKey) {
       activeKey = null;
     }

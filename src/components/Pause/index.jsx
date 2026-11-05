@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import style from './index.module.less';
 import { cn } from '../../utils/cn';
 
-export function PauseIndicator({ data = false }) {
+export const PauseIndicator = memo(function PauseIndicator({ data = false }) {
   const [showPause, setShowPause] = useState(false);
 
   useEffect(() => {
@@ -23,4 +24,4 @@ export function PauseIndicator({ data = false }) {
       })}
     />
   );
-}
+});
