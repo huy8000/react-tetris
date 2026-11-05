@@ -16,7 +16,6 @@ export class Block {
   constructor(option = {}) {
     this.type = option.type;
     this.rotateIndex = option.rotateIndex || 0;
-    this.timeStamp = option.timeStamp || Date.now();
     this.shape = option.shape ? option.shape.map(row => [...row]) : blockShape[option.type].map(row => [...row]);
     if (!option.xy) {
       if (option.type === 'I') {
@@ -40,7 +39,6 @@ export class Block {
       shape: result,
       xy: nextXy,
       rotateIndex: nextRotateIndex,
-      timeStamp: this.timeStamp,
     });
   }
 
@@ -50,7 +48,6 @@ export class Block {
       shape: this.shape,
       xy: [this.xy[0] + n, this.xy[1]],
       rotateIndex: this.rotateIndex,
-      timeStamp: Date.now(),
     });
   }
 
@@ -60,7 +57,6 @@ export class Block {
       shape: this.shape,
       xy: [this.xy[0], this.xy[1] + 1],
       rotateIndex: this.rotateIndex,
-      timeStamp: this.timeStamp,
     });
   }
 
@@ -70,7 +66,6 @@ export class Block {
       shape: this.shape,
       xy: [this.xy[0], this.xy[1] - 1],
       rotateIndex: this.rotateIndex,
-      timeStamp: this.timeStamp,
     });
   }
 }

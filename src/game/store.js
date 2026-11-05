@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { Block } from './block';
 import {
   speeds,
-  delays,
   clearPoints,
   eachLines,
   createBlankMatrix,
@@ -74,7 +73,9 @@ export const useTetrisStore = create((set, get) => ({
   },
 
   startGame: () => {
-    const { speedStart, startLines } = get();
+    const { speedStart, startLines, _dropTimer, _lockTimer } = get();
+    if (_dropTimer) clearTimeout(_dropTimer);
+    if (_lockTimer) clearTimeout(_lockTimer);
     sound.start();
     const startMatrix = getStartMatrix(startLines);
     const firstType = get().next;
@@ -91,6 +92,8 @@ export const useTetrisStore = create((set, get) => ({
       reset: false,
       lock: false,
       clearLines: 0,
+      _dropTimer: null,
+      _lockTimer: null,
     });
     saveRecordImmediate(get());
   },
@@ -100,7 +103,7 @@ export const useTetrisStore = create((set, get) => ({
   },
 
   moveLeft: () => {
-    const { cur, matrix, speedRun, pause, lock } = get();
+    const { cur, matrix, pause, lock } = get();
     if (lock) return;
     sound.move();
     if (!cur) {
@@ -114,19 +117,14 @@ export const useTetrisStore = create((set, get) => ({
       return;
     }
     const next = cur.left();
-    const delay = delays[speedRun - 1];
     if (want(next, matrix)) {
-      next.timeStamp += Math.floor(delay);
       set({ cur: next });
-    } else {
-      cur.timeStamp += Math.floor(delay / 1.5);
-      set({ cur });
     }
     saveRecordDebounced(get());
   },
 
   moveRight: () => {
-    const { cur, matrix, speedRun, pause, lock } = get();
+    const { cur, matrix, pause, lock } = get();
     if (lock) return;
     sound.move();
     if (!cur) {
@@ -140,13 +138,8 @@ export const useTetrisStore = create((set, get) => ({
       return;
     }
     const next = cur.right();
-    const delay = delays[speedRun - 1];
     if (want(next, matrix)) {
-      next.timeStamp += Math.floor(delay);
       set({ cur: next });
-    } else {
-      cur.timeStamp += Math.floor(delay / 1.5);
-      set({ cur });
     }
     saveRecordDebounced(get());
   },

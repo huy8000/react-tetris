@@ -132,13 +132,13 @@ export const Keyboard = memo(function Keyboard({ filling = 0 }) {
         label={`${i18n.reset}(R)`}
       />
       <ActionButton
-        actionKey="s"
+        actionKey="music"
         keyName="music"
         color="green"
         size="s2"
         top={0}
         left={106}
-        label={`${i18n.sound}(S)`}
+        label={`${i18n.sound}(M)`}
       />
       <ActionButton
         actionKey="p"

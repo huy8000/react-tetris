@@ -148,29 +148,37 @@ export const actions = {
     },
   },
 
-  s: {
+  music: {
     down: () => {
       const store = useTetrisStore.getState();
       store.setVirtualKey('music', true);
-      keyManager.press('s', () => {
+      keyManager.press('music', () => {
         useTetrisStore.getState().toggleMusic();
       }, { once: true });
     },
     up: () => {
       useTetrisStore.getState().setVirtualKey('music', false);
-      keyManager.release('s');
+      keyManager.release('music');
     },
   },
 };
 
 const keyMap = {
   ArrowLeft: 'left',
-  ArrowUp: 'rotate',
+  a: 'left',
+  A: 'left',
   ArrowRight: 'right',
+  d: 'right',
+  D: 'right',
   ArrowDown: 'down',
+  s: 'down',
+  S: 'down',
+  ArrowUp: 'rotate',
+  w: 'rotate',
+  W: 'rotate',
   ' ': 'space',
-  s: 's',
-  S: 's',
+  m: 'music',
+  M: 'music',
   r: 'r',
   R: 'r',
   p: 'p',
@@ -178,14 +186,14 @@ const keyMap = {
 };
 
 export function setupKeyboardListeners() {
-  let activeKey = null;
+  const pressedKeys = new Set();
 
   const onKeyDown = (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey || !(e.key in keyMap)) return;
     e.preventDefault();
     const actionKey = keyMap[e.key];
-    if (activeKey === actionKey) return;
-    activeKey = actionKey;
+    if (pressedKeys.has(actionKey)) return;
+    pressedKeys.add(actionKey);
     if (actions[actionKey]) {
       actions[actionKey].down();
     }
@@ -195,20 +203,30 @@ export function setupKeyboardListeners() {
     if (e.metaKey || !(e.key in keyMap)) return;
     e.preventDefault();
     const actionKey = keyMap[e.key];
-    if (activeKey === actionKey) {
-      activeKey = null;
-    }
+    pressedKeys.delete(actionKey);
     if (actions[actionKey]) {
       actions[actionKey].up();
     }
   };
 
+  const onBlur = () => {
+    pressedKeys.forEach(actionKey => {
+      if (actions[actionKey]) {
+        actions[actionKey].up();
+      }
+    });
+    pressedKeys.clear();
+    keyManager.clearAll();
+  };
+
   document.addEventListener('keydown', onKeyDown, true);
   document.addEventListener('keyup', onKeyUp, true);
+  window.addEventListener('blur', onBlur);
 
   return () => {
     document.removeEventListener('keydown', onKeyDown, true);
     document.removeEventListener('keyup', onKeyUp, true);
+    window.removeEventListener('blur', onBlur);
     keyManager.clearAll();
   };
 }

@@ -67,12 +67,18 @@ export const MatrixDisplay = memo(function MatrixDisplay({ matrix, cur, reset })
     return () => {
       clearTimers.current.forEach(clearTimeout);
       clearTimers.current = [];
+      setClearState(null);
     };
   }, [matrix]);
 
   // Game over animation
   useEffect(() => {
-    if (reset && !overState) {
+    if (!reset) {
+      if (overState) setOverState(null);
+      return;
+    }
+
+    if (!overState) {
       let currentDisplay = getDisplayMatrix();
       setOverState(currentDisplay);
 
@@ -95,6 +101,7 @@ export const MatrixDisplay = memo(function MatrixDisplay({ matrix, cur, reset })
 
       return () => {
         timers.forEach(t => clearTimeout(t));
+        setOverState(null);
       };
     }
   }, [reset]);

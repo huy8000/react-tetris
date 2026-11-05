@@ -90,7 +90,6 @@ function doSave(state) {
         shape: state.cur.shape,
         xy: state.cur.xy,
         rotateIndex: state.cur.rotateIndex,
-        timeStamp: state.cur.timeStamp,
       } : null,
       next: state.next,
       speedStart: state.speedStart,

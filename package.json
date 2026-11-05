@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node postbuild.cjs",
-    "preview": "vite preview"
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "keywords": [
     "tetris",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@preact/preset-vite": "^2.10.4",
     "less": "^4.6.4",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
   }
 }
