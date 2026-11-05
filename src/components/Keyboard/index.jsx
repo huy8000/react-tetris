@@ -34,6 +34,11 @@ const ActionButton = memo(function ActionButton({ actionKey, keyName, color, siz
     act.up();
   }, [act]);
 
+  const onTouchCancel = useCallback((e) => {
+    if (e.preventDefault) e.preventDefault();
+    act.up();
+  }, [act]);
+
   return (
     <Button
       color={color}
@@ -49,6 +54,7 @@ const ActionButton = memo(function ActionButton({ actionKey, keyName, color, siz
       onMouseLeave={onMouseLeave}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
     />
   );
 });

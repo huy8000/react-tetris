@@ -28,16 +28,29 @@ export const MatrixDisplay = memo(function MatrixDisplay({ matrix, cur, reset })
   const clearTimers = useRef([]);
 
   const finishClearLines = useTetrisStore(s => s.finishClearLines);
+  const roundId = useTetrisStore(s => s.roundId);
   const overEnd = useTetrisStore(s => s.overEnd);
 
   // Clear lines animation
   useEffect(() => {
+    if (reset) {
+      clearTimers.current.forEach(clearTimeout);
+      clearTimers.current = [];
+      setClearState(null);
+      return;
+    }
+
     const clears = isClear(matrix);
     if (clears && !clearState) {
       setClearState(clears);
 
+      let cancelled = false;
+      const currentRound = roundId;
+
       const addTimer = (fn, delay) => {
-        const id = setTimeout(fn, delay);
+        const id = setTimeout(() => {
+          if (!cancelled) fn();
+        }, delay);
         clearTimers.current.push(id);
         return id;
       };
@@ -57,19 +70,19 @@ export const MatrixDisplay = memo(function MatrixDisplay({ matrix, cur, reset })
           anim(() => {
             addTimer(() => {
               setClearState(null);
-              finishClearLines(clears);
+              finishClearLines(clears, currentRound);
             }, 100);
           });
         });
       });
-    }
 
-    return () => {
-      clearTimers.current.forEach(clearTimeout);
-      clearTimers.current = [];
-      setClearState(null);
-    };
-  }, [matrix]);
+      return () => {
+        cancelled = true;
+        clearTimers.current.forEach(clearTimeout);
+        clearTimers.current = [];
+      };
+    }
+  }, [matrix, reset, roundId]);
 
   // Game over animation
   useEffect(() => {

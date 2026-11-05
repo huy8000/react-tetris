@@ -81,7 +81,10 @@ export function loadLastRecord() {
 }
 
 let saveTimer = null;
+let pendingStateGetter = null;
+
 function doSave(state) {
+  if (!state || state.lock) return;
   try {
     const dataToSave = {
       matrix: state.matrix,
@@ -110,25 +113,34 @@ function doSave(state) {
   }
 }
 
-export function saveRecord(state) {
-  if (state.lock) return;
-  doSave(state);
-}
-
-export function saveRecordDebounced(state) {
-  if (state.lock) return;
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    doSave(state);
-    saveTimer = null;
-  }, 1000);
-}
-
-export function saveRecordImmediate(state) {
-  if (state.lock) return;
+export function cancelPendingSave() {
   if (saveTimer) {
     clearTimeout(saveTimer);
     saveTimer = null;
   }
+  pendingStateGetter = null;
+}
+
+export function saveRecord(state) {
+  cancelPendingSave();
   doSave(state);
+}
+
+export function saveRecordImmediate(state) {
+  saveRecord(state);
+}
+
+export function saveRecordDebounced(stateOrGetter) {
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+  }
+  pendingStateGetter = typeof stateOrGetter === 'function' ? stateOrGetter : () => stateOrGetter;
+  saveTimer = setTimeout(() => {
+    if (pendingStateGetter) {
+      const currentState = pendingStateGetter();
+      doSave(currentState);
+      pendingStateGetter = null;
+    }
+    saveTimer = null;
+  }, 1000);
 }

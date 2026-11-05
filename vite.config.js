@@ -4,6 +4,19 @@ import preact from '@preact/preset-vite';
 export default defineConfig({
   base: './',
   plugins: [preact()],
+  resolve: {
+    alias: {
+      react: 'preact/compat',
+      'react-dom': 'preact/compat',
+    },
+  },
+  test: {
+    server: {
+      deps: {
+        inline: ['zustand'],
+      },
+    },
+  },
   build: {
     outDir: 'dist',
     assetsDir: '',

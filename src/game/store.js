@@ -36,6 +36,7 @@ export const useTetrisStore = create((set, get) => ({
   pause: false,
   music: record ? record.music !== false : true,
   lock: false,
+  roundId: 1,
   _dropTimer: null,
   _lockTimer: null,
   keyboard: {
@@ -73,7 +74,7 @@ export const useTetrisStore = create((set, get) => ({
   },
 
   startGame: () => {
-    const { speedStart, startLines, _dropTimer, _lockTimer } = get();
+    const { speedStart, startLines, _dropTimer, _lockTimer, roundId } = get();
     if (_dropTimer) clearTimeout(_dropTimer);
     if (_lockTimer) clearTimeout(_lockTimer);
     sound.start();
@@ -92,6 +93,7 @@ export const useTetrisStore = create((set, get) => ({
       reset: false,
       lock: false,
       clearLines: 0,
+      roundId: (roundId || 0) + 1,
       _dropTimer: null,
       _lockTimer: null,
     });
@@ -120,7 +122,7 @@ export const useTetrisStore = create((set, get) => ({
     if (want(next, matrix)) {
       set({ cur: next });
     }
-    saveRecordDebounced(get());
+    saveRecordDebounced(get);
   },
 
   moveRight: () => {
@@ -141,7 +143,7 @@ export const useTetrisStore = create((set, get) => ({
     if (want(next, matrix)) {
       set({ cur: next });
     }
-    saveRecordDebounced(get());
+    saveRecordDebounced(get);
   },
 
   rotate: () => {
@@ -161,7 +163,7 @@ export const useTetrisStore = create((set, get) => ({
     const next = cur.rotate();
     if (want(next, matrix)) {
       set({ cur: next });
-      saveRecordDebounced(get());
+      saveRecordDebounced(get);
     }
   },
 
@@ -186,7 +188,7 @@ export const useTetrisStore = create((set, get) => ({
     } else {
       get().lockPiece(cur, matrix);
     }
-    saveRecordDebounced(get());
+    saveRecordDebounced(get);
   },
 
   hardDrop: () => {
@@ -272,8 +274,14 @@ export const useTetrisStore = create((set, get) => ({
     set({ _lockTimer: timerId });
   },
 
-  finishClearLines: (clearedRows) => {
-    const { matrix, clearLines, speedStart } = get();
+  finishClearLines: (clearedRows, callRoundId) => {
+    const { matrix, clearLines, speedStart, roundId, reset } = get();
+    if (callRoundId !== undefined && callRoundId !== roundId) {
+      return;
+    }
+    if (reset) {
+      return;
+    }
     let newMatrix = matrix.filter((_, idx) => !clearedRows.includes(idx));
     for (let i = 0; i < clearedRows.length; i++) {
       newMatrix.unshift(Array(10).fill(0));
@@ -298,13 +306,14 @@ export const useTetrisStore = create((set, get) => ({
   },
 
   overStart: () => {
-    const { _dropTimer, _lockTimer } = get();
+    const { _dropTimer, _lockTimer, roundId } = get();
     if (_dropTimer) clearTimeout(_dropTimer);
     if (_lockTimer) clearTimeout(_lockTimer);
     set({
       lock: true,
       reset: true,
       pause: false,
+      roundId: (roundId || 0) + 1,
       _dropTimer: null,
       _lockTimer: null,
     });

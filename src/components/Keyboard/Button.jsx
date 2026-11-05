@@ -16,6 +16,7 @@ export const Button = memo(function Button({
   onMouseLeave,
   onTouchStart,
   onTouchEnd,
+  onTouchCancel,
 }) {
   return (
     <div
@@ -26,6 +27,7 @@ export const Button = memo(function Button({
       onMouseLeave={onMouseLeave}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
     >
       <i className={cn({ [style.active]: active })} />
       {size === 's1' && arrow && (
