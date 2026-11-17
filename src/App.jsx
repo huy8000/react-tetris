@@ -92,8 +92,20 @@ export function App() {
     return { filling: fill, appStyle: computedStyle };
   }, [dimensions.w, dimensions.h]);
 
+  // Accessible announcements for screen readers
+  const accessibleAnnouncement = useMemo(() => {
+    if (reset) return '游戏结束';
+    if (pause) return '游戏已暂停';
+    if (!cur) return '按空格键或开始键开始游戏';
+    return `当前得分: ${points}, 最高分: ${max}, 消除行数: ${clearLines}, 速度级别: ${speedRun}`;
+  }, [reset, pause, !cur, points, max, clearLines, speedRun]);
+
   return (
-    <div className={style.app} style={appStyle}>
+    <main className={style.app} style={appStyle} role="application" aria-label="俄罗斯方块复古掌机">
+      {/* Live region for assistive technologies */}
+      <div role="status" aria-live="polite" className="visually-hidden">
+        {accessibleAnnouncement}
+      </div>
       <div className={cn(style.rect, { [style.drop]: drop })}>
         <Decorate />
         <div className={style.screen}>
@@ -119,6 +131,6 @@ export function App() {
       </div>
       <Keyboard filling={filling} />
       <Guide />
-    </div>
+    </main>
   );
 }

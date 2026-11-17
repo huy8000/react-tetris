@@ -70,11 +70,19 @@ export function getStartMatrix(startLines) {
 
 export function loadLastRecord() {
   try {
-    let data = localStorage.getItem(StorageKey);
-    if (!data) return null;
-    data = atob(data);
-    data = decodeURIComponent(data);
-    return JSON.parse(data);
+    const raw = localStorage.getItem(StorageKey);
+    if (!raw) return null;
+    // Fast path: modern plain JSON
+    if (raw.startsWith('{')) {
+      return JSON.parse(raw);
+    }
+    // Backward-compatibility: legacy Base64 encoded records
+    try {
+      const decoded = decodeURIComponent(atob(raw));
+      return JSON.parse(decoded);
+    } catch {
+      return JSON.parse(raw);
+    }
   } catch (e) {
     return null;
   }
@@ -104,10 +112,7 @@ function doSave(state) {
       music: state.music,
       pause: state.pause,
     };
-    let data = JSON.stringify(dataToSave);
-    data = encodeURIComponent(data);
-    data = btoa(data);
-    localStorage.setItem(StorageKey, data);
+    localStorage.setItem(StorageKey, JSON.stringify(dataToSave));
   } catch (e) {
     console.warn('Save record error:', e);
   }

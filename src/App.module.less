@@ -7,7 +7,7 @@
   top: 50%;
   left: 50%;
   margin: -480px 0 0 -320px;
-  background: #efcc19;
+  background: var(--console-body, #efcc19);
 
   :global {
     b {
@@ -15,27 +15,28 @@
       width: 20px;
       height: 20px;
       padding: 2px;
-      border: 2px solid #879372;
+      border: 2px solid var(--pixel-off, #879372);
       margin: 0 2px 2px 0;
       float: left;
+      flex-shrink: 0;
       &:after {
         content: '';
         display: block;
         width: 12px;
         height: 12px;
-        background: #879372;
+        background: var(--pixel-off, #879372);
         overflow: hidden;
       }
       &.c {
-        border-color: #000;
+        border-color: var(--pixel-on, #000);
         &:after {
-          background: #000;
+          background: var(--pixel-on, #000);
         }
       }
       &.d {
-        border-color: #560000;
+        border-color: var(--pixel-flash, #560000);
         &:after {
-          background: #560000;
+          background: var(--pixel-flash, #560000);
         }
       }
     }
@@ -51,6 +52,9 @@
   position: relative;
   &.drop {
     transform: translateY(5px);
+    @media (prefers-reduced-motion: reduce) {
+      transform: none;
+    }
   }
 }
 
@@ -66,9 +70,9 @@
     width: 380px;
     height: 468px;
     margin: 0 auto;
-    background: #9ead86;
+    background: var(--screen-bg, #9ead86);
     padding: 8px;
-    border: 2px solid #494536;
+    border: 2px solid var(--screen-border, #494536);
   }
 }
 

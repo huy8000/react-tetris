@@ -13,11 +13,11 @@ const Cell = memo(function Cell({ value }) {
 
 const Row = memo(function Row({ row }) {
   return (
-    <p>
+    <div className={style.row}>
       {row.map((cell, cIdx) => (
         <Cell key={cIdx} value={cell} />
       ))}
-    </p>
+    </div>
   );
 });
 
@@ -149,7 +149,7 @@ export const MatrixDisplay = memo(function MatrixDisplay({ matrix, cur, reset })
   const displayMatrix = reset && overState ? overState : getDisplayMatrix();
 
   return (
-    <div className={style.matrix}>
+    <div className={style.matrix} aria-hidden="true">
       {displayMatrix.map((row, rIdx) => (
         <Row key={rIdx} row={row} />
       ))}

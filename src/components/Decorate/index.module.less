@@ -1,5 +1,5 @@
-.decorate{
-  h1{
+.decorate {
+  h1 {
     position: absolute;
     width: 100%;
     text-align: center;
@@ -10,45 +10,51 @@
     padding: 0;
     font-size: 30px;
   }
-  .topBorder{
-    position:absolute;
-    height:10px;
-    width:100%;
-    position:absolute;
-    top:0px;
-    left:0px;
-    overflow:hidden;
-    span{
-      display:block;
-      width:10px;
-      height:10px;
-      overflow:hidden;
-      background:#000;
-      &.mr{
-        margin-right:10px;
-      }
-      &.ml{
-        margin-left:10px;
+
+  .topBorder {
+    position: absolute;
+    height: 10px;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .borderGroup {
+      display: flex;
+      gap: 10px;
+
+      span {
+        display: block;
+        width: 10px;
+        height: 10px;
+        background: #000;
+
+        &.wide {
+          width: 40px;
+        }
       }
     }
   }
-  .view{
+
+  .view {
     position: absolute;
     right: -70px;
     top: 20px;
     width: 44px;
+    display: grid;
+    grid-template-columns: repeat(2, 22px);
+    grid-auto-rows: 22px;
+
     em {
       display: block;
       width: 22px;
       height: 22px;
-      overflow: hidden;
-      float: left;
     }
-    p {
-      height: 22px;
-      clear: both;
-    }
-    &.l{
+
+    &.l {
       right: auto;
       left: -70px;
     }

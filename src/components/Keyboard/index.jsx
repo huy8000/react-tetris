@@ -10,33 +10,35 @@ const ActionButton = memo(function ActionButton({ actionKey, keyName, color, siz
   const active = useTetrisStore(s => s.keyboard[keyName]);
   const act = actions[actionKey];
 
-  const onMouseDown = useCallback((e) => {
-    if (e.preventDefault) e.preventDefault();
+  const onPointerDown = useCallback((e) => {
+    e.currentTarget.setPointerCapture?.(e.pointerId);
     act.down();
   }, [act]);
 
-  const onMouseUp = useCallback((e) => {
-    if (e.preventDefault) e.preventDefault();
+  const onPointerUp = useCallback((e) => {
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
     act.up();
   }, [act]);
 
-  const onMouseLeave = useCallback(() => {
+  const onPointerCancel = useCallback((e) => {
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
     act.up();
   }, [act]);
 
-  const onTouchStart = useCallback((e) => {
-    if (e.preventDefault) e.preventDefault();
-    act.down();
+  const onKeyDown = useCallback((e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      if (!e.repeat) {
+        e.preventDefault();
+        act.down();
+      }
+    }
   }, [act]);
 
-  const onTouchEnd = useCallback((e) => {
-    if (e.preventDefault) e.preventDefault();
-    act.up();
-  }, [act]);
-
-  const onTouchCancel = useCallback((e) => {
-    if (e.preventDefault) e.preventDefault();
-    act.up();
+  const onKeyUp = useCallback((e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      act.up();
+    }
   }, [act]);
 
   return (
@@ -49,18 +51,16 @@ const ActionButton = memo(function ActionButton({ actionKey, keyName, color, siz
       arrow={arrow}
       position={position}
       active={active}
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseLeave}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
     />
   );
 });
 
 export const Keyboard = memo(function Keyboard({ filling = 0 }) {
-  // Prevent default pinch/zoom, long press context menu
   useEffect(() => {
     const prevent = (e) => {
       if (e.preventDefault) e.preventDefault();
@@ -72,8 +72,9 @@ export const Keyboard = memo(function Keyboard({ filling = 0 }) {
   }, []);
 
   return (
-    <div
+    <section
       className={style.keyboard}
+      aria-label="游戏按键控制器"
       style={{
         marginTop: 20 + filling,
       }}
@@ -155,6 +156,6 @@ export const Keyboard = memo(function Keyboard({ filling = 0 }) {
         left={16}
         label={`${i18n.pause}(P)`}
       />
-    </div>
+    </section>
   );
 });

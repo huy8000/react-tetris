@@ -4,7 +4,7 @@ import { cn } from '../../utils/cn';
 
 export const Guide = memo(function Guide() {
   return (
-    <div>
+    <aside aria-hidden="true">
       <div className={cn(style.guide, style.right)}>
         <div className={style.up}>
           <em style={{ transform: 'translate(0,-3px) scale(1,2)' }} />
@@ -22,6 +22,6 @@ export const Guide = memo(function Guide() {
       <div className={cn(style.guide, style.left)}>
         <div className={style.space}>SPACE</div>
       </div>
-    </div>
+    </aside>
   );
 });

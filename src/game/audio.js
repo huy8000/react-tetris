@@ -10,7 +10,7 @@ class SoundPlayer {
 
   init() {
     if (this.context || typeof window === 'undefined') return;
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const AudioCtx = window.AudioContext;
     if (!AudioCtx) return;
     this.context = new AudioCtx();
 
@@ -25,12 +25,12 @@ class SoundPlayer {
         console.warn('Audio load error:', err);
       });
 
-    // Auto unlock on first interaction
+    // Auto unlock on first user gesture with modern pointer/key events
     const unlock = () => {
       if (this.unlocked) return;
       this.unlocked = true;
       if (this.context && this.context.state === 'suspended') {
-        this.context.resume();
+        this.context.resume().catch(() => {});
       }
       try {
         const buf = this.context.createBuffer(1, 1, 22050);
@@ -41,27 +41,30 @@ class SoundPlayer {
       } catch (e) {
         console.warn('Audio unlock error:', e);
       }
-      ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
-        document.removeEventListener(evt, unlock, true);
-      });
     };
-    ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
-      document.addEventListener(evt, unlock, true);
+
+    ['pointerdown', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, unlock, { once: true, passive: true });
     });
   }
 
   playSegment(start, duration) {
     if (!this.enabled || !this.context || !this.buffer) return;
+    const play = () => {
+      try {
+        const source = this.context.createBufferSource();
+        source.buffer = this.buffer;
+        source.connect(this.context.destination);
+        source.start(0, start, duration);
+      } catch (e) {
+        console.warn('Play audio error:', e);
+      }
+    };
+
     if (this.context.state === 'suspended') {
-      this.context.resume();
-    }
-    try {
-      const source = this.context.createBufferSource();
-      source.buffer = this.buffer;
-      source.connect(this.context.destination);
-      source.start(0, start, duration);
-    } catch (e) {
-      console.warn('Play audio error:', e);
+      this.context.resume().then(play).catch(() => {});
+    } else {
+      play();
     }
   }
 

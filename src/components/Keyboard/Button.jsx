@@ -11,29 +11,29 @@ export const Button = memo(function Button({
   position = false,
   arrow = '',
   active = false,
-  onMouseDown,
-  onMouseUp,
-  onMouseLeave,
-  onTouchStart,
-  onTouchEnd,
-  onTouchCancel,
+  onPointerDown,
+  onPointerUp,
+  onPointerCancel,
+  onKeyDown,
+  onKeyUp,
 }) {
   return (
-    <div
+    <button
+      type="button"
       className={cn(style.button, style[color], style[size])}
       style={{ top, left }}
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseLeave}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
+      aria-label={label}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
     >
-      <i className={cn({ [style.active]: active })} />
+      <i className={cn({ [style.active]: active })} aria-hidden="true" />
       {size === 's1' && arrow && (
-        <em style={{ transform: `${arrow} scale(1,2)` }} />
+        <em style={{ transform: `${arrow} scale(1,2)` }} aria-hidden="true" />
       )}
-      <span className={cn({ [style.position]: position })}>{label}</span>
-    </div>
+      <span className={cn({ [style.position]: position })} aria-hidden="true">{label}</span>
+    </button>
   );
 });
